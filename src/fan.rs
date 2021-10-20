@@ -5,7 +5,7 @@ pub struct Fan {
   #[cfg(target_os = "linux")]
   pin: Pin,
   #[cfg(target_os = "windows")]
-  pin: u8,
+  pin: u64,
   #[cfg(target_os = "windows")]
   _is_on: FanMode,
 }
@@ -27,7 +27,7 @@ impl From<FanMode> for u8 {
 
 impl Fan {
   #[cfg(target_os = "windows")]
-  pub fn new(pin: u8) -> Result<Self, ()> {
+  pub fn new(pin: u64) -> Result<Self, ()> {
     Ok(Self {
       pin,
       _is_on: FanMode::Off,
