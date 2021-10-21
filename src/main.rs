@@ -4,6 +4,7 @@ use std::io::{self, Write};
 use std::thread::sleep;
 use std::time::Duration;
 use log::{info, debug};
+use env_logger::Env;
 
 const TRIGGER_ON: f64 = 70.0;
 const TRIGGER_OFF: f64 = 60.0;
@@ -11,7 +12,7 @@ const TRIGGER_OFF: f64 = 60.0;
 const FAN_PIN: u64 = 23;
 
 fn main() -> Result<(), thermometer::ThermometerError>{
-    env_logger::init();
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     info!("Fan Control starting");
     info!("Running Config:");
     info!("Using GPIO {} for CPU cooler.", FAN_PIN);
@@ -23,10 +24,12 @@ fn main() -> Result<(), thermometer::ThermometerError>{
     #[cfg(target_os = "linux")]
     let fan = fan::Fan::new(FAN_PIN).expect("Unable to create Pin");
 
+    let thermometer = thermometer::Thermometer::default();
+
     debug!("Fan initialized, start to monitor temperature.");
 
     loop {
-        let temp = thermometer::read_temp()?;
+        let temp = thermometer.read_temp()?;
 
         debug!("Current temperature is {}°C", temp);
 
