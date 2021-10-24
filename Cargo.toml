@@ -1,5 +1,5 @@
 [package]
-name = "raspi_temp"
+name = "fan_control"
 version = "0.1.0"
 edition = "2018"
 
