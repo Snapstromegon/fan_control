@@ -11,7 +11,7 @@ pub struct Fan {
 }
 
 #[derive(PartialEq)]
-enum FanMode {
+pub enum FanMode {
   Off,
   On,
 }
