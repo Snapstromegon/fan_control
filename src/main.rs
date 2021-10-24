@@ -9,28 +9,29 @@ use std::time::Duration;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "basic")]
+#[structopt(name = "Fan Control")]
 struct Opt {
-    #[structopt(short = "p", long = "gpio_fan_pin", default_value = "23")]
+    #[structopt(short = "p", long = "gpio_fan_pin", default_value = "23", env)]
     fan_pin: u64,
-    #[structopt(short = "i", long = "fan_temp_on", default_value = "70")]
+    #[structopt(short = "i", long = "fan_temp_on", default_value = "70", env)]
     trigger_on: f64,
-    #[structopt(short = "o", long = "fan_temp_off", default_value = "60")]
+    #[structopt(short = "o", long = "fan_temp_off", default_value = "60", env)]
     trigger_off: f64,
     #[structopt(
         short = "t",
         long = "thermometer_path",
-        default_value = "/sys/class/thermal/thermal_zone0/temp"
+        default_value = "/sys/class/thermal/thermal_zone0/temp",
+        env
     )]
     thermometer_path: String,
 }
 
 fn main() -> Result<(), thermometer::ThermometerError> {
+    let opt = Opt::from_args();
+
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     info!("Fan Control starting");
     info!("Running Config:");
-
-    let opt = Opt::from_args();
 
     info!("Using GPIO {} for CPU cooler.", opt.fan_pin);
     info!("Using path {} for thermometer.", opt.thermometer_path);
