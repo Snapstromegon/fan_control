@@ -5,3 +5,7 @@ After=network.target
 [Service]
 ExecStart=/opt/fan_control
 Restart=always
+# Environment=FAN_PIN=23
+# Environment=THERMOMETER_PATH=/sys/class/thermal/thermal_zone0/temp
+# Environment=TRIGGER_OFF=60
+# Environment=TRIGGER_ON=70
