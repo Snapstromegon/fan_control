@@ -48,31 +48,31 @@ impl Default for Thermometer {
 #[derive(Debug)]
 pub enum ThermometerError {
   #[cfg(target_os = "linux")]
-  ParseFloatError(ParseFloatError),
+  ParseFloat(ParseFloatError),
   #[cfg(target_os = "linux")]
-  Utf8Error(str::Utf8Error),
+  Utf8(str::Utf8Error),
   #[cfg(target_os = "linux")]
-  IOError(io::Error),
+  IO(io::Error),
 }
 
 #[cfg(target_os = "linux")]
 impl From<ParseFloatError> for ThermometerError {
   fn from(err: ParseFloatError) -> Self {
-    Self::ParseFloatError(err)
+    Self::ParseFloat(err)
   }
 }
 
 #[cfg(target_os = "linux")]
 impl From<str::Utf8Error> for ThermometerError {
   fn from(err: str::Utf8Error) -> Self {
-    Self::Utf8Error(err)
+    Self::Utf8(err)
   }
 }
 
 #[cfg(target_os = "linux")]
 impl From<io::Error> for ThermometerError {
   fn from(err: io::Error) -> Self {
-    Self::IOError(err)
+    Self::IO(err)
   }
 }
 
