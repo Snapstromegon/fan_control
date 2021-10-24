@@ -1,28 +1,39 @@
 mod fan;
 mod thermometer;
+use env_logger::Env;
+use log::{debug, info};
 use std::io::{self, Write};
 use std::thread::sleep;
 use std::time::Duration;
-use log::{info, debug};
-use env_logger::Env;
 
-const TRIGGER_ON: f64 = 70.0;
-const TRIGGER_OFF: f64 = 60.0;
+use structopt::StructOpt;
 
-const FAN_PIN: u64 = 23;
+#[derive(StructOpt, Debug)]
+#[structopt(name = "basic")]
+struct Opt {
+    #[structopt(short = "p", long = "gpio_fan_pin", default_value = "23")]
+    fan_pin: u64,
+    #[structopt(short = "i", long = "fan_temp_on", default_value = "70")]
+    trigger_on: f64,
+    #[structopt(short = "o", long = "fan_temp_off", default_value = "60")]
+    trigger_off: f64,
+}
 
-fn main() -> Result<(), thermometer::ThermometerError>{
+fn main() -> Result<(), thermometer::ThermometerError> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     info!("Fan Control starting");
     info!("Running Config:");
-    info!("Using GPIO {} for CPU cooler.", FAN_PIN);
-    info!("Trigger Fan On temperature is {}°C", TRIGGER_ON);
-    info!("Trigger Fan Off temperature is {}°C", TRIGGER_OFF);
+
+    let opt = Opt::from_args();
+
+    info!("Using GPIO {} for CPU cooler.", opt.fan_pin);
+    info!("Trigger Fan On temperature is {}°C", opt.trigger_on);
+    info!("Trigger Fan Off temperature is {}°C", opt.trigger_off);
 
     #[cfg(target_os = "windows")]
-    let mut fan = fan::Fan::new(FAN_PIN).expect("Unable to create Pin");
+    let mut fan = fan::Fan::new(opt.fan_pin).expect("Unable to create Pin");
     #[cfg(target_os = "linux")]
-    let fan = fan::Fan::new(FAN_PIN).expect("Unable to create Pin");
+    let fan = fan::Fan::new(opt.fan_pin).expect("Unable to create Pin");
 
     let thermometer = thermometer::Thermometer::default();
 
@@ -33,17 +44,17 @@ fn main() -> Result<(), thermometer::ThermometerError>{
 
         debug!("Current temperature is {}°C", temp);
 
-        if fan.is_on().expect("Unable to read fan pin value") && temp >= TRIGGER_ON {
+        if fan.is_on().expect("Unable to read fan pin value") && temp >= opt.trigger_on {
             info!(
                 "CPU Temperature is {}°C >= {} -> Turning Fan On",
-                temp, TRIGGER_ON
+                temp, opt.trigger_on
             );
             fan.turn_on().expect("Unable to turn fan on");
         }
-        if fan.is_on().expect("Unable to read fan pin value") && temp <= TRIGGER_OFF {
+        if fan.is_on().expect("Unable to read fan pin value") && temp <= opt.trigger_off {
             info!(
                 "CPU Temperature is {}°C <= {} -> Turning Fan Off",
-                temp, TRIGGER_OFF
+                temp, opt.trigger_off
             );
             fan.turn_off().expect("Unable to turn fan on");
         }
