@@ -9,3 +9,7 @@ Restart=always
 # Environment=THERMOMETER_PATH=/sys/class/thermal/thermal_zone0/temp
 # Environment=TRIGGER_OFF=60
 # Environment=TRIGGER_ON=70
+# Environment=RUST_LOG=info
+
+[Install]
+WantedBy=multi-user.target
