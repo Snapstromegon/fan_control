@@ -40,8 +40,8 @@ $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 Download the source from either the release, or the master of this repo.
 
 ```sh
-$ git clone git@github.com:Snapstromegon/raspi_temp.git
-$ cd raspi_temp
+$ git clone git@github.com:Snapstromegon/fan_control.git
+$ cd fan_control
 ```
 
 ##### Compile
