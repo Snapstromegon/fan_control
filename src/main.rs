@@ -1,7 +1,7 @@
 mod fan;
 mod thermometer;
 use env_logger::Env;
-use log::{debug, info};
+use log::{debug, error, info};
 use std::io::{self, Write};
 use std::thread::sleep;
 use std::time::Duration;
@@ -17,6 +17,12 @@ struct Opt {
     trigger_on: f64,
     #[structopt(short = "o", long = "fan_temp_off", default_value = "60")]
     trigger_off: f64,
+    #[structopt(
+        short = "t",
+        long = "thermometer_path",
+        default_value = "/sys/class/thermal/thermal_zone0/temp"
+    )]
+    thermometer_path: String,
 }
 
 fn main() -> Result<(), thermometer::ThermometerError> {
@@ -27,6 +33,7 @@ fn main() -> Result<(), thermometer::ThermometerError> {
     let opt = Opt::from_args();
 
     info!("Using GPIO {} for CPU cooler.", opt.fan_pin);
+    info!("Using path {} for thermometer.", opt.thermometer_path);
     info!("Trigger Fan On temperature is {}°C", opt.trigger_on);
     info!("Trigger Fan Off temperature is {}°C", opt.trigger_off);
 
@@ -34,10 +41,31 @@ fn main() -> Result<(), thermometer::ThermometerError> {
     let mut fan = fan::Fan::new(opt.fan_pin).expect("Unable to create Pin");
     #[cfg(target_os = "linux")]
     let fan = fan::Fan::new(opt.fan_pin).expect("Unable to create Pin");
+    info!(
+        "Fan is currently {}.",
+        match fan.is_on() {
+            Ok(true) => "on",
+            Ok(false) => "off",
+            _ => {
+                error!("Unable to get fan state!");
+                std::process::exit(1);
+            }
+        }
+    );
 
-    let thermometer = thermometer::Thermometer::default();
+    let thermometer = thermometer::Thermometer::new(&opt.thermometer_path);
+    info!(
+        "Temperature is currently {}.",
+        match thermometer.read_temp() {
+            Ok(x) => x,
+            _ => {
+                error!("Unable to read temperature!");
+                std::process::exit(1);
+            }
+        }
+    );
 
-    debug!("Fan initialized, start to monitor temperature.");
+    debug!("Setup done, start monitioring temperature.");
 
     loop {
         let temp = thermometer.read_temp()?;
