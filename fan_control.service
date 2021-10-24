@@ -1,0 +1,7 @@
+[Unit]
+Description=Fan Control
+After=network.target
+
+[Service]
+ExecStart=/opt/fan_control
+Restart=always
