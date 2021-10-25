@@ -73,20 +73,22 @@ fn main() -> Result<(), thermometer::ThermometerError> {
 
         debug!("Current temperature is {}°C", temp);
 
-        if fan.is_on().expect("Unable to read fan pin value") && temp >= opt.trigger_on {
+        let is_fan_on = fan.is_on().expect("Unable to read fan state!");
+
+        if !is_fan_on && temp >= opt.trigger_on {
             info!(
                 "CPU Temperature is {}°C >= {} -> Turning Fan On",
                 temp, opt.trigger_on
             );
             fan.turn_on().expect("Unable to turn fan on");
-        }
-        if fan.is_on().expect("Unable to read fan pin value") && temp <= opt.trigger_off {
+        } else if is_fan_on && temp <= opt.trigger_off {
             info!(
                 "CPU Temperature is {}°C <= {} -> Turning Fan Off",
                 temp, opt.trigger_off
             );
             fan.turn_off().expect("Unable to turn fan on");
         }
+
         io::stdout().flush().unwrap();
         sleep(Duration::from_secs(1));
     }
