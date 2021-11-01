@@ -6,7 +6,7 @@ After=network.target
 ExecStart=/opt/fan_control
 Restart=always
 # Environment=FAN_PIN=23
-# Environment=THERMOMETER_PATH=/sys/class/thermal/thermal_zone0/temp
+# Environment=THERMAL_ZONE=thermal_zone0
 # Environment=TRIGGER_OFF=60
 # Environment=TRIGGER_ON=70
 # Environment=RUST_LOG=info

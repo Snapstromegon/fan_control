@@ -1,36 +1,46 @@
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 use std::fmt;
-#[cfg(not(feature = "mocked_sysfs"))]
-use std::fs;
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
+use std::fs::{read_dir, read_to_string};
+#[cfg(feature = "sysfs")]
 use std::io;
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 use std::num::ParseFloatError;
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 use std::str;
 
 pub struct Thermometer {
-  #[cfg(not(feature = "mocked_sysfs"))]
-  path: String,
+  #[cfg(feature = "sysfs")]
+  thermal_zone: String,
 }
 
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 impl Thermometer {
-  pub fn new(sysfs_thermometer_path: &str) -> Self {
+  pub fn new(thermal_zone: &str) -> Self {
     Thermometer {
-      path: sysfs_thermometer_path.into(),
+      thermal_zone: thermal_zone.into(),
     }
   }
 
   pub fn read_temp(&self) -> Result<f64, ThermometerError> {
-    let string_temp = fs::read_to_string(&self.path)?;
+    let string_temp = read_to_string(&format!("/sys/class/thermal/{}/temp", self.thermal_zone))?;
     let temp_float: f64 = string_temp.trim().parse()?;
     Ok(temp_float / 1000.0)
   }
+
+  pub fn get_available_thermal_zones() -> Result<Vec<String>, io::Error> {
+    Ok(
+      read_dir("/sys/class/thermal/")?
+        .filter_map(|e| e.ok())
+        .map(|e| e.file_name().into_string())
+        .filter_map(|e| e.ok())
+        .collect(),
+    )
+  }
 }
-#[cfg(feature = "mocked_sysfs")]
+#[cfg(not(feature = "sysfs"))]
 impl Thermometer {
-  pub fn new(_sysfs_thermometer_path: &str) -> Self {
+  pub fn new(_thermal_zone: &str) -> Self {
     Thermometer {}
   }
 
@@ -41,11 +51,11 @@ impl Thermometer {
 
 impl Default for Thermometer {
   fn default() -> Self {
-    Thermometer::new("/sys/class/thermal/thermal_zone0/temp")
+    Thermometer::new("thermal_zone0")
   }
 }
 
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 #[derive(Debug)]
 pub enum ThermometerError {
   ParseFloat(ParseFloatError),
@@ -53,32 +63,32 @@ pub enum ThermometerError {
   IO(io::Error),
 }
 
-#[cfg(feature = "mocked_sysfs")]
+#[cfg(not(feature = "sysfs"))]
 #[derive(Debug)]
 pub enum ThermometerError {}
 
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 impl From<ParseFloatError> for ThermometerError {
   fn from(err: ParseFloatError) -> Self {
     Self::ParseFloat(err)
   }
 }
 
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 impl From<str::Utf8Error> for ThermometerError {
   fn from(err: str::Utf8Error) -> Self {
     Self::Utf8(err)
   }
 }
 
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 impl From<io::Error> for ThermometerError {
   fn from(err: io::Error) -> Self {
     Self::IO(err)
   }
 }
 
-#[cfg(not(feature = "mocked_sysfs"))]
+#[cfg(feature = "sysfs")]
 impl fmt::Display for ThermometerError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "Thermometer Error")

@@ -19,11 +19,11 @@ struct Opt {
     trigger_off: f64,
     #[structopt(
         short = "t",
-        long = "thermometer_path",
-        default_value = "/sys/class/thermal/thermal_zone0/temp",
+        long = "thermal_zone",
+        default_value = "thermal_zone0",
         env
     )]
-    thermometer_path: String,
+    thermal_zone: String,
 }
 
 fn main() -> Result<(), thermometer::ThermometerError> {
@@ -33,14 +33,15 @@ fn main() -> Result<(), thermometer::ThermometerError> {
     info!("Fan Control starting");
     info!("Running Config:");
 
+    info!("Available Thermal Zones: {:?}", thermometer::Thermometer::get_available_thermal_zones().expect("Unable to list available thermal zones!"));
+    info!("Using Thermal Zong {}.", opt.thermal_zone);
     info!("Using GPIO {} for CPU cooler.", opt.fan_pin);
-    info!("Using path {} for thermometer.", opt.thermometer_path);
     info!("Trigger Fan On temperature is {}°C", opt.trigger_on);
     info!("Trigger Fan Off temperature is {}°C", opt.trigger_off);
 
-    #[cfg(feature = "mocked_sysfs")]
+    #[cfg(not(feature = "sysfs"))]
     let mut fan = fan::Fan::new(opt.fan_pin).expect("Unable to create Pin");
-    #[cfg(not(feature = "mocked_sysfs"))]
+    #[cfg(feature = "sysfs")]
     let fan = fan::Fan::new(opt.fan_pin).expect("Unable to create Pin");
     info!(
         "Fan is currently {}.",
@@ -54,7 +55,7 @@ fn main() -> Result<(), thermometer::ThermometerError> {
         }
     );
 
-    let thermometer = thermometer::Thermometer::new(&opt.thermometer_path);
+    let thermometer = thermometer::Thermometer::new(&opt.thermal_zone);
     info!(
         "Temperature is currently {}.",
         match thermometer.read_temp() {
