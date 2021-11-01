@@ -1,12 +1,12 @@
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 use sysfs_gpio::{Direction, Pin};
 
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 pub struct Fan {
   pin: Pin,
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(feature = "mocked_sysfs")]
 pub struct Fan {
   pin: u64,
   _is_on: FanMode,
@@ -27,7 +27,7 @@ impl From<FanMode> for u8 {
   }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 impl Fan {
   pub fn new(pin: u64) -> Result<Self, sysfs_gpio::Error> {
     let pin = Pin::new(pin);
@@ -49,7 +49,7 @@ impl Fan {
   }
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(feature = "mocked_sysfs")]
 impl Fan {
   pub fn new(pin: u64) -> Result<Self, ()> {
     Ok(Self {

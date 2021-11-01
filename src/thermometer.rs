@@ -1,20 +1,20 @@
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 use std::fmt;
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 use std::fs;
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 use std::io;
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 use std::num::ParseFloatError;
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 use std::str;
 
 pub struct Thermometer {
-  #[cfg(target_os = "linux")]
+  #[cfg(not(feature = "mocked_sysfs"))]
   path: String,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 impl Thermometer {
   pub fn new(sysfs_thermometer_path: &str) -> Self {
     Thermometer {
@@ -28,7 +28,7 @@ impl Thermometer {
     Ok(temp_float / 1000.0)
   }
 }
-#[cfg(not(target_os = "linux"))]
+#[cfg(feature = "mocked_sysfs")]
 impl Thermometer {
   pub fn new(_sysfs_thermometer_path: &str) -> Self {
     Thermometer {}
@@ -45,7 +45,7 @@ impl Default for Thermometer {
   }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 #[derive(Debug)]
 pub enum ThermometerError {
   ParseFloat(ParseFloatError),
@@ -53,32 +53,32 @@ pub enum ThermometerError {
   IO(io::Error),
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(feature = "mocked_sysfs")]
 #[derive(Debug)]
 pub enum ThermometerError {}
 
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 impl From<ParseFloatError> for ThermometerError {
   fn from(err: ParseFloatError) -> Self {
     Self::ParseFloat(err)
   }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 impl From<str::Utf8Error> for ThermometerError {
   fn from(err: str::Utf8Error) -> Self {
     Self::Utf8(err)
   }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 impl From<io::Error> for ThermometerError {
   fn from(err: io::Error) -> Self {
     Self::IO(err)
   }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(not(feature = "mocked_sysfs"))]
 impl fmt::Display for ThermometerError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "Thermometer Error")
