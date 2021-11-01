@@ -38,7 +38,7 @@ fn main() -> Result<(), thermometer::ThermometerError> {
     info!("Trigger Fan On temperature is {}°C", opt.trigger_on);
     info!("Trigger Fan Off temperature is {}°C", opt.trigger_off);
 
-    #[cfg(target_os = "windows")]
+    #[cfg(not(target_os = "linux"))]
     let mut fan = fan::Fan::new(opt.fan_pin).expect("Unable to create Pin");
     #[cfg(target_os = "linux")]
     let fan = fan::Fan::new(opt.fan_pin).expect("Unable to create Pin");

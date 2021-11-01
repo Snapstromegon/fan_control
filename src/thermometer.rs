@@ -21,12 +21,12 @@ impl Thermometer {
       path: sysfs_thermometer_path.into(),
     }
   }
-  #[cfg(target_os = "windows")]
+  #[cfg(not(target_os = "linux"))]
   pub fn new(_sysfs_thermometer_path: &str) -> Self {
     Thermometer {}
   }
 
-  #[cfg(target_os = "windows")]
+  #[cfg(not(target_os = "linux"))]
   pub fn read_temp(&self) -> Result<f64, ThermometerError> {
     Ok(43.0)
   }

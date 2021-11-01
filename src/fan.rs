@@ -4,9 +4,9 @@ use sysfs_gpio::{Direction, Pin};
 pub struct Fan {
   #[cfg(target_os = "linux")]
   pin: Pin,
-  #[cfg(target_os = "windows")]
+  #[cfg(not(target_os = "linux"))]
   pin: u64,
-  #[cfg(target_os = "windows")]
+  #[cfg(not(target_os = "linux"))]
   _is_on: FanMode,
 }
 
@@ -26,7 +26,7 @@ impl From<FanMode> for u8 {
 }
 
 impl Fan {
-  #[cfg(target_os = "windows")]
+  #[cfg(not(target_os = "linux"))]
   pub fn new(pin: u64) -> Result<Self, ()> {
     Ok(Self {
       pin,
@@ -55,7 +55,7 @@ impl Fan {
     Ok(self.pin.get_value()? != 0)
   }
 
-  #[cfg(target_os = "windows")]
+  #[cfg(not(target_os = "linux"))]
   pub fn is_on(&self) -> Result<bool, ()> {
     Ok(self._is_on == FanMode::On)
   }
@@ -65,7 +65,7 @@ impl Fan {
     self.pin.set_value(FanMode::On.into())
   }
 
-  #[cfg(target_os = "windows")]
+  #[cfg(not(target_os = "linux"))]
   pub fn turn_on(&mut self) -> Result<(), ()> {
     println!("Turning Fan on Pin {} on", self.pin);
     self._is_on = FanMode::On;
@@ -77,7 +77,7 @@ impl Fan {
     self.pin.set_value(FanMode::Off.into())
   }
 
-  #[cfg(target_os = "windows")]
+  #[cfg(not(target_os = "linux"))]
   pub fn turn_off(&mut self) -> Result<(), ()> {
     println!("Turning Fan on Pin {} off", self.pin);
     self._is_on = FanMode::Off;
