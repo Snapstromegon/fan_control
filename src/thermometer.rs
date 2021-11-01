@@ -14,28 +14,28 @@ pub struct Thermometer {
   path: String,
 }
 
+#[cfg(target_os = "linux")]
 impl Thermometer {
-  #[cfg(target_os = "linux")]
   pub fn new(sysfs_thermometer_path: &str) -> Self {
     Thermometer {
       path: sysfs_thermometer_path.into(),
     }
   }
-  #[cfg(not(target_os = "linux"))]
-  pub fn new(_sysfs_thermometer_path: &str) -> Self {
-    Thermometer {}
-  }
 
-  #[cfg(not(target_os = "linux"))]
-  pub fn read_temp(&self) -> Result<f64, ThermometerError> {
-    Ok(43.0)
-  }
-
-  #[cfg(target_os = "linux")]
   pub fn read_temp(&self) -> Result<f64, ThermometerError> {
     let string_temp = fs::read_to_string(&self.path)?;
     let temp_float: f64 = string_temp.trim().parse()?;
     Ok(temp_float / 1000.0)
+  }
+}
+#[cfg(not(target_os = "linux"))]
+impl Thermometer {
+  pub fn new(_sysfs_thermometer_path: &str) -> Self {
+    Thermometer {}
+  }
+
+  pub fn read_temp(&self) -> Result<f64, ThermometerError> {
+    Ok(43.0)
   }
 }
 
@@ -45,15 +45,17 @@ impl Default for Thermometer {
   }
 }
 
+#[cfg(target_os = "linux")]
 #[derive(Debug)]
 pub enum ThermometerError {
-  #[cfg(target_os = "linux")]
   ParseFloat(ParseFloatError),
-  #[cfg(target_os = "linux")]
   Utf8(str::Utf8Error),
-  #[cfg(target_os = "linux")]
   IO(io::Error),
 }
+
+#[cfg(not(target_os = "linux"))]
+#[derive(Debug)]
+pub enum ThermometerError {}
 
 #[cfg(target_os = "linux")]
 impl From<ParseFloatError> for ThermometerError {
